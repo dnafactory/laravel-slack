@@ -1,0 +1,37 @@
+{
+  "name": "dnafactory/laravel-slack",
+  "description": "PHP integration with Slack's API for laravel",
+  "keywords": [
+    "dnafactory",
+    "slack"
+  ],
+  "homepage": "https://github.com/dnafactory/laravel-slack",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4.0",
+    "illuminate/support": "^v8.0.0",
+    "illuminate/routing": "^v8.0.0",
+    "illuminate/config": "^v8.0.0",
+    "guzzlehttp/guzzle": "^7.2",
+    "ext-json": "*"
+  },
+  "authors": [
+    {
+      "name": "Domenico Ragusa",
+      "email": "domenico.ragusa@dnafactory.it",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "DNAFactory\\Slack\\": ""
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "DNAFactory\\Slack\\SlackServiceProvider"
+      ]
+    }
+  }
+}
