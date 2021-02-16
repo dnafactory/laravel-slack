@@ -3,6 +3,7 @@
 namespace DNAFactory\Slack\Endpoints;
 
 use DNAFactory\Slack\Exceptions\SlackErrorException;
+use DNAFactory\Slack\Support\Proxy;
 
 class Users extends Proxy
 {

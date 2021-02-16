@@ -1,6 +1,6 @@
 <?php
 
-namespace DNAFactory\Slack\Endpoints;
+namespace DNAFactory\Slack\Support;
 
 use DNAFactory\Slack\Exceptions\ConnectionException;
 use GuzzleHttp\Client as HttpClient;
