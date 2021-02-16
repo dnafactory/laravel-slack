@@ -13,7 +13,7 @@ class Users extends Proxy
      */
     public function list(): array
     {
-        $request = $this->jsonCall('users.list');
+        $request = $this->jsonCall('/users.list');
         if(!$request['ok']){
             throw new SlackErrorException('error with users.list request, response: '.json_encode($request));
         }
