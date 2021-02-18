@@ -75,8 +75,10 @@ class Proxy
         $httpParams = ['headers' => $this->headers];
         if ($encoding == self::ENCODING_JSON) {
             $httpParams['body'] = json_encode($params);
+            $httpParams['headers']['Content-Type'] = 'application/json';
         } elseif ($encoding == self::ENCODING_FORM_URLENCODE) {
             $httpParams['body'] = http_build_query($params);
+            $httpParams['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
         } elseif ($encoding == self::ENCODING_QUERY) {
             $httpParams['query'] = http_build_query($params);
         }
