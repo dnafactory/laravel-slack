@@ -28,6 +28,13 @@ class SlackServiceProvider extends ServiceProvider
             return $users;
         });
 
+        $this->app->singleton(Endpoints\Chat::class, function () use ($token) {
+            $chat = new Endpoints\Chat(app(HttpClient::class));
+            $chat->setBaseUrl('https://slack.com/api');
+            $chat->setToken($token);
+            return $chat;
+        });
+
         $handlers = config('laravel-slack.event_handlers', []);
         $this->app->singleton(EventCallbackDispatcher::class, function () use ($handlers) {
             return new EventCallbackDispatcher($handlers);
