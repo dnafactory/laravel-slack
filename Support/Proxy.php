@@ -5,6 +5,7 @@ namespace DNAFactory\Slack\Support;
 use DNAFactory\Slack\Exceptions\ConnectionException;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 
 class Proxy
@@ -16,8 +17,9 @@ class Proxy
     protected HttpClient $httpClient;
     protected array $headers = [];
     protected string $baseUrl;
-    protected int $waitMargin;
+    protected int $waitMargin = 2;
     protected $maximumTries = 5;
+    protected $defaultWait = 30;
 
     public function __construct(HttpClient $httpClient)
     {
@@ -56,7 +58,7 @@ class Proxy
     protected function jsonCall(string $endpoint, array $params = [], $method = 'GET', $encoding = self::ENCODING_QUERY)
     {
         $data = $this->rawCall($endpoint, $params, $method, $encoding);
-        return json_decode($data->getBody(), true);
+        return json_decode($data, true);
     }
 
     protected function queryCall(
@@ -66,7 +68,7 @@ class Proxy
         $encoding = self::ENCODING_QUERY
     ) {
         $rawData = $this->rawCall($endpoint, $params, $method, $encoding);
-        parse_str($rawData->getBody(), $data);
+        parse_str($rawData, $data);
         return $data;
     }
 
@@ -100,13 +102,28 @@ class Proxy
     protected function rawRequest(string $method, string $uri, array $params)
     {
         for ($i = 0; $i < $this->maximumTries; $i++) {
-            $request = $this->httpClient->request($method, $uri, $params);
-            if ($request->getStatusCode() != 429) { // too many requests
-                break;
+            try{
+                $response = $this->httpClient->request($method, $uri, $params);
+            } catch (RequestException $e) {
+                $this->waitRateLimit($e->hasResponse()
+                    ? $e->getResponse()
+                    : null);
+                continue;
             }
-            $retryAfter = (int)$request->getHeader('Retry-After');
-            time_sleep_until(time() + $retryAfter + $this->waitMargin);
+            if ($response->getStatusCode() == 200) {
+                return (string)$response->getBody();
+            }
         }
-        return $request ?? null;
+        throw new ConnectionException("Call to $method failed after {$i} attempts.");
+    }
+
+    protected function waitRateLimit(?ResponseInterface $response)
+    {
+        $wait = $this->defaultWait;
+        if (!is_null($response)) {
+            $wait = $response->getHeader('Retry-After')[0] ?? '';
+            $wait = (int)$wait;
+        }
+        time_sleep_until(time() + $wait + $this->waitMargin);
     }
 }
